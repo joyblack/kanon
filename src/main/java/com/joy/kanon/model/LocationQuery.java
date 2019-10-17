@@ -27,8 +27,4 @@ public class LocationQuery {
      * 用户端形成的匿名区最少包含用户真实位置和K-1个其他用户位置
      */
     private Integer K;
-
-
-
-
 }

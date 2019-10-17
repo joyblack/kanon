@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.Date;
-
 /**
  * 用户位置
  */
@@ -15,6 +13,31 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Location {
+    /**
+     * 行为：新或者旧或者消失
+     */
+    private StatusEum status;
+
+    /**
+     * 对象ID
+     */
+    private Long id;
+
+    /**
+     * 回报编码
+     */
+    private Long repNum;
+
+    /**
+     * 对象类型
+     */
+    private Long objClass;
+
+    /**
+     * 所处当前位置的时间(从0开始计算)
+     */
+    private Long time;
+
     /**
      * 精度
      */
@@ -26,7 +49,13 @@ public class Location {
     private Double y;
 
     /**
-     * 所处当前位置的时间
+     * 运行速度
      */
-    private Date t;
+    private Double speed;
+
+    /**
+     * 下一个运动点的预测经纬度
+     */
+    private Double nextX;
+    private Double nextY;
 }

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common/module::commonHeader('index')">
+</head>
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed navbar-inverse" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">匿名算法</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">Link</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">One more separated link</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <form class="navbar-form navbar-left">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Search">
+                </div>
+                <button type="submit" class="btn btn-default">Submit</button>
+            </form>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">Link</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Separated link</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+<div class="container">
+    <div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-12 col-sm-12">
+            <div class="jumbotron">
+                <h1>Hello, Mr.Arya!</h1>
+                <p>This is an example to show the big data and algorithm. To select next panel's to see it in action.</p>
+            </div>
+            <div class="row">
+                <div class="col-xs-6 col-lg-4">
+                    <h2>匿名算法</h2>
+                    <p>基于客户端服务器结
+                        构，用户可以向位置服务器发送ｋ个位置信息，其中包括用户
+                        的真实位置和ｋ－１个假位置，使得位置服务器无法分辨出用
+                        户的真实位置.用户还可以构造 出包括用户位置的匿名
+                        区［３］，位置服务器根据用户提交的匿名区无法定位用户的准
+                        确位置。</p>
+                    <p>
+                        <a class="btn btn-default" th:href="@{/kanon/index}" role="button">View details »</a>
+                    </p>
+                </div><!--/.col-xs-6.col-lg-4-->
+                <div class="col-xs-6 col-lg-4">
+                    <h2>Cosine Similarity</h2>
+                    <p>Cosine similarity, also known as cosine similarity, is to evaluate the similarity of two vectors by calculating their angle cosine values. Cosine similarity draws vectors into vector space according to coordinate values, such as the most common two-dimensional space.
+                    </p>
+                    <p><a class="btn btn-default" th:href="@{/algorithm/cosine}" role="button">View details »</a></p>
+                </div><!--/.col-xs-6.col-lg-4-->
+                <div class="col-xs-6 col-lg-4">
+                    <h2>Pearson Similarity</h2>
+                    <p>To reflect the degree of linear correlation between two random variables, this similarity has more effect and limit, like compute A
+                    and B must be obey the law of normal distribution.</p>
+                    <p><a class="btn btn-default" th:href="@{/algorithm/pearson}" role="button">View details »</a></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6 col-lg-4">
+                    <h2>Ex.WordCount</h2>
+                    <p>Word count is the simple example, for big data learn like learn other code language's start program 'hello world', but is's very intersted, we must know it's means.<p>
+                    <a class="btn btn-default" th:href="@{/count/index}" role="button">View details »</a></p>
+                </div><!--/.col-xs-6.col-lg-4-->
+                <div class="col-xs-6 col-lg-4">
+                    <h2>Ex.Pager</h2>
+                    <p>Pager example used the jaccard algorithm to compute the pager's similarity, this is a good way to concern. And you will konwn it is also interested to compute some similarity program. <p>
+                    <a class="btn btn-default"  th:href="@{/pager/index}" role="button">View details »</a></p>
+                </div><!--/.col-xs-6.col-lg-4-->
+                <div class="col-xs-6 col-lg-4">
+                    <h2>Ex.Movie</h2>
+                    <p>This example used we learn three similarity algorithm:jaccard,cosine and pearson, we can get the three result and decide which one is reliable. </p>
+                    <p><a class="btn btn-default" th:href="@{/movie/index}" role="button">View details »</a></p>
+                </div><!--/.col-xs-6.col-lg-4-->
+            </div><!--/row-->
+        </div>
+    </div>
+    <hr>
+
+    <footer>
+        <p>© GuanZhou Sunrun Company 2019.1.23</p>
+    </footer>
+    </div><!--/row-->
+
+
+
+</div>
+</body>
+</html>

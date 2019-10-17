@@ -1,8 +1,6 @@
 package com.joy.kanon.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
@@ -10,52 +8,47 @@ import lombok.ToString;
  */
 @Data
 @ToString
-@AllArgsConstructor
-@NoArgsConstructor
 public class Location {
     /**
-     * 行为：新或者旧或者消失
+     * 对象名称
      */
-    private StatusEum status;
-
-    /**
-     * 对象ID
-     */
-    private Long id;
-
-    /**
-     * 回报编码
-     */
-    private Long repNum;
-
-    /**
-     * 对象类型
-     */
-    private Long objClass;
+    private String name;
 
     /**
      * 所处当前位置的时间(从0开始计算)
      */
-    private Long time;
+    private int time;
 
     /**
-     * 精度
+     * 坐标X
      */
-    private Double x;
+    private double x;
 
     /**
-     * 维度
+     * 坐标Y
      */
-    private Double y;
+    private double y;
+
+    public Location(String name, int time, double x, double y) {
+        this.name = name;
+        this.time = time;
+        this.x = x;
+        this.y = y;
+    }
 
     /**
-     * 运行速度
+     * 判断个点是否相等
+     * @param other
+     * @return
      */
-    private Double speed;
+    @Override
+    public boolean equals(Object other){
+        if(other instanceof Location){
+            Location b = (Location) other;
+            return this.x == b.x && this.y == b.y;
+        }
+        return false;
+    }
 
-    /**
-     * 下一个运动点的预测经纬度
-     */
-    private Double nextX;
-    private Double nextY;
+
 }

@@ -29,6 +29,7 @@
                         <!-- Tab panes -->
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active" id="opt">
+                                <hr>
                                 <button @click="loadRoad()" class="btn btn-primary btn-sm">加载路网数据</button>
                                 <button @click="getBFS()" class="btn btn-primary btn-sm">广度优先</button>
                                 <button @click="getDFS()" class="btn btn-primary btn-sm">深度优先</button>
@@ -37,7 +38,14 @@
                                 <button @click="draw()" class="btn btn-primary btn-sm">绘制图形</button>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="profile">
-
+                                <hr>
+                                <div style="border: 1px  #000000; width: 90%; margin: 0 auto;height: 500px;overflow-y:scroll; overflow-x:scroll;">
+                                    <ul>
+                                        <li v-for="log in logs">
+                                            <span class="text-danger">{{log.time}}: </span> <span class="text-primary">{{log.info}}</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
 
@@ -58,7 +66,8 @@
             K: 3,
             canvas: null,
             network: null,
-            CELL_SIZE: 10
+            CELL_SIZE: 10,
+            logs: []
         },
         methods: {
             /**
@@ -72,21 +81,17 @@
                         const vm = this;
                         for (let i = 0; i < edges.length; i++) {
                             const edge = edges[i];
-                            console.log(edge)
-
-                            console.log("绘制点：" + edge.v1.name + "到点：" + edge.v2.name)
+                            this.logInfo("绘制点：" + edge.v1.name + "到点：" + edge.v2.name)
                             vm.network.moveTo(edge.v1.x * vm.CELL_SIZE, edge.v1.y * vm.CELL_SIZE);
                             vm.network.lineTo(edge.v2.x * vm.CELL_SIZE, edge.v2.y * vm.CELL_SIZE);
                             vm.network.strokeStyle = "#0033CC"
                             vm.network.stroke();
-
-
                         }
                     })
             },
             showInfo: function (e) {
                 const location = this.getLocation(e.clientX, e.clientY);
-                console.log("x=" + Math.floor(location.x) + " ,y=" + Math.floor(location.y));
+                this.logInfo("当前位置：x=" + Math.floor(location.x) + " ,y=" + Math.floor(location.y));
             },
             // 获取位置信息
             getLocation: function (x, y) {
@@ -95,7 +100,19 @@
                     x: (x - bbox.left) * (this.canvas.width / bbox.width),
                     y: (y - bbox.top) * (this.canvas.height / bbox.height)
                 };
-            }
+            },
+            // 记录日志
+            logInfo: function(info){
+                this.logs.push({
+                    info: info,
+                    time: this.getNowTime()
+                })
+            },
+            // 获取格式化时间
+            getNowTime: function () {
+                const date = new Date();
+                return date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+             }
         },
         mounted: function () {
             this.canvas = this.canvas = document.getElementById("network");
@@ -106,7 +123,6 @@
                     this.network.fillRect(this.CELL_SIZE * i, this.CELL_SIZE * j, this.CELL_SIZE * (i + 1), this.CELL_SIZE * (j + 1));
                 }
             }
-
         }
     }).$mount("#app");
 

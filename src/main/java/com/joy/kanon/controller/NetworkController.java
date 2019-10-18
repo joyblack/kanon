@@ -3,7 +3,6 @@ package com.joy.kanon.controller;
 import com.joy.kanon.model.Location;
 import com.joy.kanon.model.NetWork;
 import com.joy.kanon.repository.NetworkRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -32,13 +31,13 @@ public class NetworkController {
     @RequestMapping("getBFS")
     @ResponseBody
     public List<Location> getBFS(){
-        return NetworkRepository.netWork.getBFS();
+        return NetworkRepository.netWork.getBfs();
     }
 
     @RequestMapping("getDFS")
     @ResponseBody
     public List<Location> getDFS(){
-        return NetworkRepository.netWork.getDFS();
+        return NetworkRepository.netWork.getDfs();
     }
 
 }

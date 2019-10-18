@@ -45,7 +45,7 @@ public class Location {
     public boolean equals(Object other){
         if(other instanceof Location){
             Location b = (Location) other;
-            return this.x == b.x && this.y == b.y;
+            return this.name == b.name || this.x == b.x && this.y == b.y;
         }
         return false;
     }

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script th:src="@{/js/vue.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
+    <script th:src="@{/js/vue-resource.js}"></script>
+    <script th:src="@{/js/jquery-2.1.1.js}"></script>
+    <script th:src="@{/js/bootstrap.js}"></script>
+    <title>新路网匿名</title>
+</head>
+<body>
+<div class="container-fluid" id="app" style="margin-top: 12px;">
+    <div class="row text-left">
+        <div class="col-md-7">
+            <canvas id="network" width="1000" height="1000" style="border:1px solid #000000;"
+                    @onmousemove="showInfo"></canvas>
+        </div>
+        <div class="col-md-5">
+            <div class="row" style="margin-top: 12px;">
+                <div class="col-md-12">
+                    <div>
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#opt" aria-controls="opt" role="tab"
+                                                                      data-toggle="tab">操作面板</a></li>
+                            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab"
+                                                       data-toggle="tab">日志面板</a></li>
+                        </ul>
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="opt">
+                                <button @click="loadRoad()" class="btn btn-primary btn-sm">加载路网数据</button>
+                                <button @click="getBFS()" class="btn btn-primary btn-sm">广度优先</button>
+                                <button @click="getDFS()" class="btn btn-primary btn-sm">深度优先</button>
+                                <button @click="formatData()" class="btn btn-primary btn-sm">格式化数据</button>
+                                <button @click="showTable=!showTable" class="btn btn-primary btn-sm">隐藏/显示表格</button>
+                                <button @click="draw()" class="btn btn-primary btn-sm">绘制图形</button>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="profile">
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * App组件
+     */
+    const app = new Vue({
+        data: {
+            K: 3,
+            canvas: null,
+            network: null,
+            CELL_SIZE: 10
+        },
+        methods: {
+            /**
+             * 加载路网数据
+             */
+            loadRoad: function () {
+                this.$http.get("[[@{/network/loadData}]]")
+                    .then(function (response) {
+                        const edges = response.body.edges;
+                        this.network.lineWidth = 10;
+                        const vm = this;
+                        for (let i = 0; i < edges.length; i++) {
+                            const edge = edges[i];
+                            console.log(edge)
+
+                            console.log("绘制点：" + edge.v1.name + "到点：" + edge.v2.name)
+                            vm.network.moveTo(edge.v1.x * vm.CELL_SIZE, edge.v1.y * vm.CELL_SIZE);
+                            vm.network.lineTo(edge.v2.x * vm.CELL_SIZE, edge.v2.y * vm.CELL_SIZE);
+                            vm.network.strokeStyle = "#0033CC"
+                            vm.network.stroke();
+
+
+                        }
+                    })
+            },
+            showInfo: function (e) {
+                const location = this.getLocation(e.clientX, e.clientY);
+                console.log("x=" + Math.floor(location.x) + " ,y=" + Math.floor(location.y));
+            },
+            // 获取位置信息
+            getLocation: function (x, y) {
+                const bbox = this.canvas.getBoundingClientRect();
+                return {
+                    x: (x - bbox.left) * (this.canvas.width / bbox.width),
+                    y: (y - bbox.top) * (this.canvas.height / bbox.height)
+                };
+            }
+        },
+        mounted: function () {
+            this.canvas = this.canvas = document.getElementById("network");
+            this.network = this.canvas = document.getElementById("network").getContext("2d");
+            for (let i = 0; i < 100; i++) {
+                for (let j = 0; j < 100; j++) {
+                    this.network.fillStyle = "#CCC";
+                    this.network.fillRect(this.CELL_SIZE * i, this.CELL_SIZE * j, this.CELL_SIZE * (i + 1), this.CELL_SIZE * (j + 1));
+                }
+            }
+
+        }
+    }).$mount("#app");
+
+</script>
+</body>
+
+</html>

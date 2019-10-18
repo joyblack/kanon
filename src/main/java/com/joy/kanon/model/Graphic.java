@@ -11,7 +11,7 @@ import java.util.List;
  */
 @Data
 @ToString
-public class Road {
+public class Graphic {
     /**
      * 节点坐标信息
      */
@@ -20,11 +20,11 @@ public class Road {
     /**
      * 节点邻居节点信息
      */
-    List<Road> neighborList;
+    List<Graphic> neighborList;
 
     private boolean visited;
 
-    public Road(Location node) {
+    public Graphic(Location node) {
         this.node = node;
         neighborList = new ArrayList<>();
         visited = false;
@@ -32,8 +32,8 @@ public class Road {
 
     @Override
     public boolean equals(Object other){
-        if(other instanceof Road){
-            Road b = (Road) other;
+        if(other instanceof Graphic){
+            Graphic b = (Graphic) other;
             return this.node.equals(b.node);
         }
         return false;

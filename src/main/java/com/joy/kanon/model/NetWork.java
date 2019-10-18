@@ -1,15 +1,13 @@
 package com.joy.kanon.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.joy.kanon.config.NetworkConfig;
+import com.joy.kanon.enums.KColor;
 import lombok.Data;
 import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 构建网络
@@ -43,10 +41,24 @@ public class NetWork {
     @JsonIgnore
     public List<Graphic> road;
 
+    private Cell[][] cells = new Cell[NetworkConfig.WIDTH][NetworkConfig.WIDTH];
+
     public NetWork() {
         edges = new ArrayList<>();
         randomLocation = new ArrayList<>();
         road = new ArrayList<>();
+        /**
+         * 网格初始化
+         */
+        for (int i = 0; i < NetworkConfig.WIDTH; i++) {
+            for (int j = 0; j < NetworkConfig.WIDTH; j++) {
+                cells[i][j] = new Cell(
+                        i * NetworkConfig.CELL_SIZE,
+                        j * NetworkConfig.CELL_SIZE,
+                        0,
+                        KColor.NOTHING.getColor());
+            }
+        }
         init();
     }
 
@@ -54,25 +66,25 @@ public class NetWork {
         /**
          * 初始化路况
          */
-        Graphic A = new Graphic(new Location("A", 0, 0D, 0D));
-        Graphic B = new Graphic(new Location("B", 0, 20D, 0D));
-        Graphic C = new Graphic(new Location("C", 0, 20D, 40D));
-        Graphic D = new Graphic(new Location("D", 0, 0D, 50D));
-        Graphic E = new Graphic(new Location("E", 0, 10D, 50D));
-        Graphic F = new Graphic(new Location("F", 0, 10D, 90D));
-        Graphic G = new Graphic(new Location("G", 0, 0D, 90D));
-        Graphic H = new Graphic(new Location("H", 0, 0D, 100D));
-        Graphic I = new Graphic(new Location("I", 0, 20D, 100D));
-        Graphic J = new Graphic(new Location("J", 0, 100D, 100D));
-        Graphic K = new Graphic(new Location("K", 0, 100D, 70D));
-        Graphic L = new Graphic(new Location("L", 0, 80D, 70D));
-        Graphic M = new Graphic(new Location("M", 0, 40D, 15D));
-        Graphic N = new Graphic(new Location("N", 0, 40D, 50D));
-        Graphic O = new Graphic(new Location("O", 0, 80D, 15D));
-        Graphic P = new Graphic(new Location("P", 0, 100D, 0D));
-        Graphic Q = new Graphic(new Location("Q", 0, 20D, 50D));
-        Graphic R = new Graphic(new Location("R", 0, 20D, 70D));
-        Graphic S = new Graphic(new Location("S", 0, 80D, 0D));
+        Graphic A = new Graphic(new Location("A", 0, 0, 0));
+        Graphic B = new Graphic(new Location("B", 0, 20, 0));
+        Graphic C = new Graphic(new Location("C", 0, 20, 40));
+        Graphic D = new Graphic(new Location("D", 0, 0, 50));
+        Graphic E = new Graphic(new Location("E", 0, 10, 50));
+        Graphic F = new Graphic(new Location("F", 0, 10, 90));
+        Graphic G = new Graphic(new Location("G", 0, 0, 90));
+        Graphic H = new Graphic(new Location("H", 0, 0, 100));
+        Graphic I = new Graphic(new Location("I", 0, 20, 100));
+        Graphic J = new Graphic(new Location("J", 0, 100, 100));
+        Graphic K = new Graphic(new Location("K", 0, 100, 70));
+        Graphic L = new Graphic(new Location("L", 0, 80, 70));
+        Graphic M = new Graphic(new Location("M", 0, 40, 15));
+        Graphic N = new Graphic(new Location("N", 0, 40, 50));
+        Graphic O = new Graphic(new Location("O", 0, 80, 15));
+        Graphic P = new Graphic(new Location("P", 0, 100, 0));
+        Graphic Q = new Graphic(new Location("Q", 0, 20, 50));
+        Graphic R = new Graphic(new Location("R", 0, 20, 70));
+        Graphic S = new Graphic(new Location("S", 0, 80, 0));
 
         A.getNeighborList().add(B);
         B.getNeighborList().addAll(Arrays.asList(A,C));
@@ -131,11 +143,40 @@ public class NetWork {
          */
         for (int i = 0; i < NetworkConfig.RANDOM_NUM; i++) {
             Random random = new Random();
-            randomLocation.add(new Location("SSS",
+            int x = random.nextInt(NetworkConfig.WIDTH);
+            int y = random.nextInt(NetworkConfig.WIDTH);
+            Location point = new Location("RANDOM_LOCATION",
                     0,
-                    Math.floor(random.nextDouble() * (NetworkConfig.WIDTH * NetworkConfig.CELL_SIZE)),
-                    Math.floor(random.nextDouble() * (NetworkConfig.WIDTH * NetworkConfig.CELL_SIZE))));
+                    x * NetworkConfig.CELL_SIZE,
+                    y * NetworkConfig.CELL_SIZE);
+            randomLocation.add(point);
+
+            int number = cells[x][y].getNumber() + 1;
+            cells[x][y].setNumber(number);
+            if(number < NetworkConfig.THRESHOLD){
+                cells[x][y].setColor(KColor.LESS.getColor());
+            }else{
+                cells[x][y].setColor(KColor.THAN.getColor());
+            }
         }
+        /**
+         * 随机点排序
+         */
+        randomLocation = randomLocation.stream()
+                .sorted(Comparator.comparing(Location::getX)
+                        .thenComparing(Location::getY))
+                .collect(Collectors.toList());
+    }
+
+    private String getKColor(int number){
+        if(number == 0){
+            return KColor.NOTHING.getColor();
+        }else if(number < NetworkConfig.THRESHOLD){
+            return KColor.LESS.getColor();
+        }else{
+            return KColor.THAN.getColor();
+        }
+
     }
 
     public void clear(){

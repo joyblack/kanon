@@ -13,7 +13,8 @@
     <div class="row text-left">
         <div class="col-md-7">
             <canvas id="network" width="1000" height="1000" style="border:1px solid #000000;"
-                    @onmousemove="showInfo"></canvas>
+                    @click="showInfo($event)">
+            </canvas>
         </div>
         <div class="col-md-5">
             <div class="row" style="margin-top: 12px;">
@@ -36,6 +37,49 @@
                                 <button @click="formatData()" class="btn btn-primary btn-sm">格式化数据</button>
                                 <button @click="showTable=!showTable" class="btn btn-primary btn-sm">隐藏/显示表格</button>
                                 <button @click="draw()" class="btn btn-primary btn-sm">绘制图形</button>
+                                <hr>
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">网络规格</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control"  v-model="width">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">网络大小</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control"  v-model="cellSize">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">K值</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control"  v-model="k">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">网格选取阈值</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control"  v-model="threshold">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">随机点个数</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control"  v-model="randomNum">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <button @click="change" class="btn btn-default">更改</button>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="profile">
                                 <hr>
@@ -63,11 +107,15 @@
      */
     const app = new Vue({
         data: {
-            K: 3,
             canvas: null,
             network: null,
-            CELL_SIZE: 10,
-            logs: []
+            logs: [],
+            // 网格配置相关
+            cellSize: 10,
+            width: 100,
+            k:3,
+            threshold: 5,
+            randomNum: 10000
         },
         methods: {
             /**
@@ -77,15 +125,23 @@
                 this.$http.get("[[@{/network/loadData}]]")
                     .then(function (response) {
                         const edges = response.body.edges;
-                        this.network.lineWidth = 10;
-                        const vm = this;
+                        const cells = response.body.cells;
+                        this.network.lineWidth = this.cellSize;
+                        // 先绘制网格
+                        for (let i = 0; i < this.width; i++) {
+                            for (let j = 0; j < this.width; j++) {
+                                this.network.fillStyle = cells[i][j].color;
+                                this.network.fillRect(this.cellSize * i, this.cellSize * j, this.cellSize * (i + 1), this.cellSize * (j + 1));
+                            }
+                        }
+
+                        // 然后绘制路况
                         for (let i = 0; i < edges.length; i++) {
                             const edge = edges[i];
-                            this.logInfo("绘制点：" + edge.v1.name + "到点：" + edge.v2.name)
-                            vm.network.moveTo(edge.v1.x * vm.CELL_SIZE, edge.v1.y * vm.CELL_SIZE);
-                            vm.network.lineTo(edge.v2.x * vm.CELL_SIZE, edge.v2.y * vm.CELL_SIZE);
-                            vm.network.strokeStyle = "#0033CC"
-                            vm.network.stroke();
+                            this.network.moveTo(edge.v1.x * this.cellSize, edge.v1.y * this.cellSize);
+                            this.network.lineTo(edge.v2.x * this.cellSize, edge.v2.y * this.cellSize);
+                            this.network.strokeStyle = "#0033CC"
+                            this.network.stroke();
                         }
                     })
             },
@@ -111,18 +167,18 @@
             // 获取格式化时间
             getNowTime: function () {
                 const date = new Date();
-                return date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
-             }
+                return this.add0(date.getHours()) + ':' + this.add0(date.getMinutes()) + ':' + this.add0(date.getSeconds());
+             },
+            change: function(){
+
+            },
+            add0: function (s) {
+                return s < 10 ? '0' + s: s;
+            }
         },
         mounted: function () {
-            this.canvas = this.canvas = document.getElementById("network");
-            this.network = this.canvas = document.getElementById("network").getContext("2d");
-            for (let i = 0; i < 100; i++) {
-                for (let j = 0; j < 100; j++) {
-                    this.network.fillStyle = "#CCC";
-                    this.network.fillRect(this.CELL_SIZE * i, this.CELL_SIZE * j, this.CELL_SIZE * (i + 1), this.CELL_SIZE * (j + 1));
-                }
-            }
+            this.canvas = document.getElementById("network");
+            this.network = document.getElementById("network").getContext("2d");
         }
     }).$mount("#app");
 

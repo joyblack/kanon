@@ -24,7 +24,7 @@ public class NetworkConfig {
     /**
      * 生成随机点个数
      */
-    public static int RANDOM_NUM = 1000;
+    public static int RANDOM_NUM = 10000;
 
 
 

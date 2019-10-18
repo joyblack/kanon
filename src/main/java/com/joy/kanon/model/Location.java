@@ -22,14 +22,14 @@ public class Location {
     /**
      * 坐标X
      */
-    private double x;
+    private int x;
 
     /**
      * 坐标Y
      */
-    private double y;
+    private int y;
 
-    public Location(String name, int time, double x, double y) {
+    public Location(String name, int time, int x, int y) {
         this.name = name;
         this.time = time;
         this.x = x;

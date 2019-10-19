@@ -8,7 +8,7 @@ import lombok.ToString;
  */
 @Data
 @ToString
-public class Location {
+public class Vertex {
     /**
      * 对象名称
      */
@@ -29,7 +29,7 @@ public class Location {
      */
     private int y;
 
-    public Location(String name, int time, int x, int y) {
+    public Vertex(String name, int time, int x, int y) {
         this.name = name;
         this.time = time;
         this.x = x;
@@ -43,8 +43,8 @@ public class Location {
      */
     @Override
     public boolean equals(Object other){
-        if(other instanceof Location){
-            Location b = (Location) other;
+        if(other instanceof Vertex){
+            Vertex b = (Vertex) other;
             return this.name == b.name || this.x == b.x && this.y == b.y;
         }
         return false;

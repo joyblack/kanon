@@ -19,12 +19,12 @@ public class NetworkConfig {
     /**
      * 选取网格阈值
      */
-    public static int THRESHOLD = 5;
+    public static int THRESHOLD = 3;
 
     /**
      * 生成随机点个数
      */
-    public static int RANDOM_NUM = 10000;
+    public static int RANDOM_NUM = 30000;
 
 
 

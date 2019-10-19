@@ -15,7 +15,7 @@ public class Graphic {
     /**
      * 节点坐标信息
      */
-    Location node;
+    Vertex vertex;
 
     /**
      * 节点邻居节点信息
@@ -24,8 +24,8 @@ public class Graphic {
 
     private boolean visited;
 
-    public Graphic(Location node) {
-        this.node = node;
+    public Graphic(Vertex vertex) {
+        this.vertex = vertex;
         neighborList = new ArrayList<>();
         visited = false;
     }
@@ -34,7 +34,7 @@ public class Graphic {
     public boolean equals(Object other){
         if(other instanceof Graphic){
             Graphic b = (Graphic) other;
-            return this.node.equals(b.node);
+            return this.vertex.equals(b.vertex);
         }
         return false;
     }

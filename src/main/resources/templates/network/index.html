@@ -28,15 +28,19 @@
                                                        data-toggle="tab">日志面板</a></li>
                         </ul>
                         <!-- Tab panes -->
-                        <div class="tab-content">
+                        <div class="tab-content" style="margin: 18px">
                             <div role="tabpanel" class="tab-pane active" id="opt">
+                                <button @click="refresh()" class="btn btn-default">刷新</button>
+                                <button @click="loadData()" :disabled="loadDataBtnDisabled" class="btn btn-primary ">加载所有用户数据</button>
+                                <button @click="loadRoad()" :disabled="loadRoadBtnDisabled" class="btn btn-primary">加载地理路况</button>
+                                <button @click="loadUser()" :disabled="loadUserBtnDisabled" class="btn btn-primary">加载目标用户位置数据</button>
                                 <hr>
-                                <button @click="loadRoad()" class="btn btn-primary btn-sm">加载路网数据</button>
-                                <button @click="getBFS()" class="btn btn-primary btn-sm">广度优先</button>
-                                <button @click="getDFS()" class="btn btn-primary btn-sm">深度优先</button>
-                                <button @click="formatData()" class="btn btn-primary btn-sm">格式化数据</button>
-                                <button @click="showTable=!showTable" class="btn btn-primary btn-sm">隐藏/显示表格</button>
-                                <button @click="draw()" class="btn btn-primary btn-sm">绘制图形</button>
+                                <button @click="showReal()" :disabled="showRealBtnDisabled" class="btn btn-danger">显示用户隐私轨迹</button>
+                                <button @click="superK()" class="btn btn-danger">superK</button>
+                                <hr>
+                                <button @click="logs = []" class="btn btn-warning">清空日志</button>
+                                <button @click="loadBlock()" class="btn btn-primary">显示区块</button>
+                                <button @click="restore()" class="btn btn-primary">清除隐私轨迹</button>
                                 <hr>
                                 <form class="form-horizontal">
                                     <div class="form-group">
@@ -76,7 +80,7 @@
 
                                     <div class="form-group">
                                         <div class="col-sm-offset-2 col-sm-10">
-                                            <button @click="change" class="btn btn-default">更改</button>
+                                            <button @click="change" class="btn btn-danger">更改</button>
                                         </div>
                                     </div>
                                 </form>
@@ -115,41 +119,128 @@
             width: 100,
             k:3,
             threshold: 5,
-            randomNum: 10000
+            randomNum: 10000,
+            networkData: {},
+            loadDataBtnDisabled: false,
+            loadRoadBtnDisabled: true,
+            loadUserBtnDisabled: true,
+            showRealBtnDisabled: false,
+            colors: ["red","blue","yellow","black","#20B2AA","green","aqua","purple","#FF00FF", "##00FF00"]
         },
         methods: {
+            // 加载所有用户信息数据
+            loadData: function(){
+                this.loadDataBtnDisabled = true;
+                this.loadRoadBtnDisabled = false;
+                const cells = this.networkData.cells;
+                // 先绘制网格
+                this.network.lineWidth = this.cellSize;
+                for (let i = 0; i < this.width; i++) {
+                    for (let j = 0; j < this.width; j++) {
+                        this.network.fillStyle = cells[i][j].color;
+                        this.network.fillRect(this.cellSize * i, this.cellSize * j, this.cellSize, this.cellSize);
+                    }
+                }
+            },
             /**
-             * 加载路网数据
+             * 加载路况
              */
             loadRoad: function () {
-                this.$http.get("[[@{/network/loadData}]]")
-                    .then(function (response) {
-                        const edges = response.body.edges;
-                        const cells = response.body.cells;
-                        this.network.lineWidth = this.cellSize;
-                        // 先绘制网格
-                        for (let i = 0; i < this.width; i++) {
-                            for (let j = 0; j < this.width; j++) {
-                                this.network.fillStyle = cells[i][j].color;
-                                this.network.fillRect(this.cellSize * i, this.cellSize * j, this.cellSize * (i + 1), this.cellSize * (j + 1));
-                            }
-                        }
+                this.loadRoadBtnDisabled = true;
+                this.loadUserBtnDisabled = false;
+                this.logInfo("开始加载实际路况...")
+                this.network.lineWidth = this.cellSize;
+                const edges = this.networkData.edges
+                this.network.strokeStyle = "#555"
+                for (let i = 0; i < edges.length; i++) {
+                    const edge = edges[i];
+                    this.network.moveTo(edge.v1.x, edge.v1.y);
+                    this.network.lineTo(edge.v2.x, edge.v2.y);
+                    this.network.stroke();
+                }
 
-                        // 然后绘制路况
-                        for (let i = 0; i < edges.length; i++) {
-                            const edge = edges[i];
-                            this.network.moveTo(edge.v1.x * this.cellSize, edge.v1.y * this.cellSize);
-                            this.network.lineTo(edge.v2.x * this.cellSize, edge.v2.y * this.cellSize);
-                            this.network.strokeStyle = "#0033CC"
-                            this.network.stroke();
-                        }
-                    })
+                // 绘制路况端点描述
+                const bfs = this.networkData.bfs;
+                // this.network.font = "6pt Helvetica"
+                this.network.fillStyle = "black";
+                for (let i = 0; i < bfs.length; i++) {
+                    const v = bfs[i];
+                    const textLocation = this.getSuitLocation(v.x, v.y);
+                    this.network.fillText(v.name + "(" + v.x  + "," + v.y  + ")",textLocation.x,textLocation.y);
+
+                }
+                this.logInfo("实际路况加载完毕...")
             },
+            /**
+             *  加载目标用户坐标信息数据
+             */
+            loadUser: function(){
+                this.loadUserBtnDisabled = true;
+                this.showRealBtnDisabled = false;
+                const movePoint = this.networkData.movePoint;
+                this.network.font = "10pt Helvetica"
+                this.network.fillStyle = "green";
+                for (let i = 0; i < movePoint.length; i++) {
+                    const v = movePoint[i];
+                    // 画圆
+                    this.network.beginPath();
+                    this.network.arc(v.x,v.y,5,0,Math.PI * 2);
+                    this.network.closePath();
+                    this.network.fill();
+                    const textLocation = this.getSuitLocation(v.x, v.y);
+                    this.network.fillText(v.name + "(" + v.x  + "," + v.y  + ")",textLocation.x,textLocation.y);
+                }
+                this.network.save();
+            },
+            /**
+             *  绘制实际隐私数据
+             */
+            showReal: function(){
+                const movePath = this.networkData.movePath;
+                this.network.strokeStyle = "green"
+                this.network.lineWidth = this.cellSize;
+                for (let i = 0; i < movePath.length; i++) {
+                    const edge = movePath[i];
+                    this.network.moveTo(edge.v1.x, edge.v1.y);
+                    this.network.lineTo(edge.v2.x, edge.v2.y);
+                    this.network.stroke();
+                }
+
+            },
+            loadBlock: function(){
+                const blocks = this.networkData.blocks;
+                for (let i = 0; i < blocks.length; i++) {
+                    const block = blocks[i];
+                    this.network.fillStyle = this.colors[i % this.colors.length];
+                    this.network.fillRect(block.vertexes[0].x,block.vertexes[0].y, block.vertexes[2].x - block.vertexes[0].x,block.vertexes[2].y - block.vertexes[0].y);
+                }
+            },
+            restore: function(){
+                this.network.clearRect(0,0,this.network.width, this.network.height);
+                this.loadData();
+                this.loadRoad();
+                this.loadUser();
+            } ,
+            superK: function(){
+                const userWithAnons = this.networkData.superK.userWithAnons;
+                this.network.fillStyle = "red";
+                for (let i = 0; i < userWithAnons.length; i++) {
+                    const cells = userWithAnons[i].cells;
+                    for (let j = 0; j < cells.length; j++) {
+                        this.network.fillRect(this.cellSize * cells[j].x,this.cellSize * cells[j].y , this.cellSize, this.cellSize);
+                    }
+                }
+            },
+            /**
+             * 显示位置信息
+             */
             showInfo: function (e) {
                 const location = this.getLocation(e.clientX, e.clientY);
                 this.logInfo("当前位置：x=" + Math.floor(location.x) + " ,y=" + Math.floor(location.y));
             },
-            // 获取位置信息
+            /**
+             * 获取位置信息
+             */
             getLocation: function (x, y) {
                 const bbox = this.canvas.getBoundingClientRect();
                 return {
@@ -157,28 +248,57 @@
                     y: (y - bbox.top) * (this.canvas.height / bbox.height)
                 };
             },
-            // 记录日志
+            /**
+             * 记录日志
+             */
             logInfo: function(info){
                 this.logs.push({
                     info: info,
                     time: this.getNowTime()
                 })
             },
-            // 获取格式化时间
+            refresh: function(){
+              location.reload();
+            },
+            /**
+             * 获取格式化时间
+             */
             getNowTime: function () {
                 const date = new Date();
                 return this.add0(date.getHours()) + ':' + this.add0(date.getMinutes()) + ':' + this.add0(date.getSeconds());
              },
+            /**
+             * 更改配置参数
+             */
             change: function(){
 
             },
+            /**
+             * 格式化日期补0
+             */
             add0: function (s) {
                 return s < 10 ? '0' + s: s;
+            },
+            /**
+             * 获取名称适合放置的坐标点
+             */
+            getSuitLocation(x,y){
+                return {
+                    x: (x + 15) >= this.width * 10 ? x - 15: x + 15,
+                    y: (y + 15) >= this.width * 10 ? y - 15: y + 15,
+                }
             }
         },
         mounted: function () {
+            this.logInfo("初始化画布...")
             this.canvas = document.getElementById("network");
             this.network = document.getElementById("network").getContext("2d");
+            this.logInfo("加载路网数据...")
+            this.$http.get("[[@{/network/loadData}]]")
+                .then(function (response) {
+                    this.networkData =response.body;
+                    this.logInfo("路网数据加载完毕...")
+                })
         }
     }).$mount("#app");
 

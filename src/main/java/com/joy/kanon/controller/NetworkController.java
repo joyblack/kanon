@@ -1,6 +1,6 @@
 package com.joy.kanon.controller;
 
-import com.joy.kanon.model.Location;
+import com.joy.kanon.model.Vertex;
 import com.joy.kanon.model.NetWork;
 import com.joy.kanon.repository.NetworkRepository;
 import org.springframework.stereotype.Controller;
@@ -30,13 +30,13 @@ public class NetworkController {
 
     @RequestMapping("getBFS")
     @ResponseBody
-    public List<Location> getBFS(){
+    public List<Vertex> getBFS(){
         return NetworkRepository.netWork.getBfs();
     }
 
     @RequestMapping("getDFS")
     @ResponseBody
-    public List<Location> getDFS(){
+    public List<Vertex> getDFS(){
         return NetworkRepository.netWork.getDfs();
     }
 

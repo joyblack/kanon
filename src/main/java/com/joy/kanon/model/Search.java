@@ -11,9 +11,9 @@ import java.util.*;
 @Data
 @ToString
 public class Search {
-    private List<Location> DFS;
+    private List<Vertex> DFS;
 
-    private List<Location> BFS;
+    private List<Vertex> BFS;
 
     public Search() {
         this.DFS = new ArrayList<>();
@@ -27,7 +27,7 @@ public class Search {
         if(root == null){
             return;
         }
-        DFS.add(root.getNode());
+        DFS.add(root.getVertex());
         root.setVisited(true);
         for (Graphic node : root.getNeighborList()) {
             if(!node.isVisited()){
@@ -44,7 +44,7 @@ public class Search {
         if(root == null){
             return;
         }
-        BFS.add(root.getNode());
+        BFS.add(root.getVertex());
         root.setVisited(true);
 
         // 加到队列中
@@ -55,7 +55,7 @@ public class Search {
             Graphic node = queue.poll();
             for (Graphic n : node.neighborList) {
                 if(!n.isVisited()){
-                    BFS.add(n.getNode());
+                    BFS.add(n.getVertex());
                     n.setVisited(true);
                     // 加入到队列中
                     queue.addLast(n);

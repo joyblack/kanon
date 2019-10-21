@@ -12,18 +12,12 @@ import java.util.List;
 
 @Data
 @ToString
-public class SuperK {
-    /**
-     * 外接圆所需的3个顶点
-     */
-    private static final int TOP_NUMBER = 3;
-
+public class CommonK {
     /**
      * 路网
      */
     @JsonIgnore
     private NetWork netWork;
-
 
     /**
      * 用户 - 区块
@@ -35,7 +29,7 @@ public class SuperK {
      */
     private List<UserWithAnon> userWithAnons;
 
-    public SuperK(NetWork netWork) {
+    public CommonK(NetWork netWork) {
         this.netWork = netWork;
     }
 
@@ -67,7 +61,7 @@ public class SuperK {
 
 
         /**
-         * 根据质心点，查找构造区，查找K个最适合的区块点
+         * 查找用户点周边K个最适合的区块点
          */
         userWithAnons = new ArrayList<>();
         for (Vertex u : user) {

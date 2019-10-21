@@ -175,7 +175,6 @@ public class NetWork {
 
         blocks.add(new Block(Arrays.asList(N16.getVertex(),N8.getVertex(),N9.getVertex(),N10.getVertex()),new Vertex("P7",0,600,850)));
 
-
         Vertex P8 = new Vertex("P8",0,1000,150);
         blocks.add(new Block(Arrays.asList(N11.getVertex(),P6, N10.getVertex(),P8),new Vertex("P8",0,700,400)));
 
@@ -222,20 +221,16 @@ public class NetWork {
         movePoint.add(new Vertex("u4", 3, 387, 677));
         movePoint.add(new Vertex("u5", 4, 935, 683));
 
-
         /**
          * 通过计算用户点距离最近的边，推测用户路径
          */
         movePath = getPath(movePoint);
 
-
         /**
          * K匿名算法
          */
-        superK = new SuperK(NetworkConfig.K, this);
+        superK = new SuperK(this);
         superK.run();
-
-
     }
 
     private String getKColor(int number){
@@ -274,16 +269,16 @@ public class NetWork {
         return result;
     }
 
+
     /**
-     * 获取K匿名算法外接圆
-     * @return
+     * 修改K值重算
      */
-    public List<Circle> getCircle(){
-        return superK.getCircle();
+    public void changeK(int k, int s){
+        NetworkConfig.K = k;
+        NetworkConfig.THRESHOLD = s;
+        superK = new SuperK(this);
+        superK.run();
     }
-
-
-
 
 
 }

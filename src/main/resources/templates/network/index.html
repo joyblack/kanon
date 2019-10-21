@@ -46,14 +46,21 @@
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label">网络规格</label>
                                         <div class="col-sm-10">
-                                            <input type="number" class="form-control"  v-model="width">
+                                            <input type="number" class="form-control"  v-model="width" disabled="disabled">
                                         </div>
                                     </div>
 
                                     <div class="form-group">
                                         <label class="col-sm-2 control-label">网络大小</label>
                                         <div class="col-sm-10">
-                                            <input type="number" class="form-control"  v-model="cellSize">
+                                            <input type="number" class="form-control"  v-model="cellSize" disabled="disabled">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">随机点个数</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control"  v-model="randomNum" disabled="disabled">
                                         </div>
                                     </div>
 
@@ -72,15 +79,8 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="col-sm-2 control-label">随机点个数</label>
-                                        <div class="col-sm-10">
-                                            <input type="number" class="form-control"  v-model="randomNum">
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
                                         <div class="col-sm-offset-2 col-sm-10">
-                                            <button @click="change" class="btn btn-danger">更改</button>
+                                            <button @click="change" class="btn btn-danger">修改</button>
                                         </div>
                                     </div>
                                 </form>
@@ -271,13 +271,18 @@
              * 更改配置参数
              */
             change: function(){
-
+                this.$http.get("[[@{/network/change/" + this.k + "/" + this.threshold + "}]]")
+                    .then(function (response) {
+                        this.restore();
+                        this.networkData = response.body;
+                        this.logInfo("更改后计算完毕...")
+                    })
             },
             /**
              * 格式化日期补0
              */
             add0: function (s) {
-                return s < 10 ? '0' + s: s;
+                return s < 10 ? '0' + s : s;
             },
             /**
              * 获取名称适合放置的坐标点

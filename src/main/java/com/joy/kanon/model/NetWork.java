@@ -141,6 +141,7 @@ public class NetWork {
         search.searchBFS(this.road.get(0));
         bfs = search.getBFS();
         clear();
+
         search.searchDFS(this.road.get(0));
         dfs = search.getDFS();
         clear();

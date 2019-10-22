@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <script th:src="@{/js/vue.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}">
+    <script th:src="@{/js/vue-resource.js}"></script>
+    <script th:src="@{/js/jquery-2.1.1.js}"></script>
+    <script th:src="@{/js/bootstrap.js}"></script>
+    <script th:src="@{/js/echarts.min.js}"></script>
+    <title>统计</title>
+</head>
+<body>
+    <div class="container-fluid" id="app">
+        <div class="row">
+            <div class="col-md-6" style="margin-top: 24px;">
+                <div id="main" style="width: 800px;height:800px;"></div>
+            </div>
+            <div class="col-md-6">
+                 <h2>
+                     SuperK
+                 </h2>
+                <hr>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">K</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="k">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" class="btn btn-default" @click="getSuperK">计算正确率</button>
+                            <button type="button" class="btn btn-default">绘制统计图</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h2>
+                    CommonK
+                </h2>
+            </div>
+        </div>
+    </div>
+    <script>
+        const app = new Vue({
+            data: {
+                k: 3,
+                myChart: []
+            },
+            methods: {
+                getSuperK: function(){
+                    this.$http.get("[[@{/statistic/getSuperK/}]]" + this.k)
+                        .then(function (response) {
+                            console.log(response)
+                        })
+                }
+
+            },
+            mounted: function(){
+                const option = {
+                    title: {
+                        text: 'ECharts 入门示例'
+                    },
+                    tooltip: {},
+                    legend: {
+                        data:['销量']
+                    },
+                    xAxis: {
+                        data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+                    },
+                    yAxis: {},
+                    series: [{
+                        name: '销量',
+                        type: 'bar',
+                        data: [5, 20, 36, 10, 10, 20]
+                    }]
+                };
+                this.myChart = echarts.init(document.getElementById('main'));
+                this.myChart.setOption(option);
+            }
+        }).$mount("#app");
+    </script>
+</body>
+</html>

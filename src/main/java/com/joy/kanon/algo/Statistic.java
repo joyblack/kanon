@@ -26,7 +26,7 @@ public class Statistic {
         return min;
     }
 
-    public StatisticResult superKGet(int k){
+    public StatisticResult getSuperK(int k){
         SuperK superK = new SuperK(netWork, k);
         superK.run();
 
@@ -66,7 +66,7 @@ public class Statistic {
          * 计算正确率，正确率是以K个点分别作为参考点计算之后得到的结果，
          * 相当于K（min）轮检测结果的总统计。
          */
-        return getStatisticResult(netWork.getEdges(), referEdges);
+        return getStatisticResult(netWork.getMovePath(), referEdges);
     }
 
     /**
@@ -75,20 +75,28 @@ public class Statistic {
      * computeE 所有K个点推导出的结果进行计算正确率
      */
     private StatisticResult getStatisticResult(List<Edge> correctE, List<List<Edge>> computeEList){
+        System.out.println("正确的路段信息为：" + correctE);
         StatisticResult result = new StatisticResult();
         result.setTrueNum(netWork.getEdges().size());
         if(computeEList == null || correctE == null || computeEList.size() == 0 || correctE.size() == 0){
             return result;
         }else{
+            System.out.println("#############################################");
             int trueNum = 0;
             int total = 0;
             for (List<Edge> computeE : computeEList) {
-                total += Math.max(computeE.size(),correctE.size());
+                System.out.println("***************************");
+                int trueNumChild = 0;
+                int totalChild =  Math.max(computeE.size(),correctE.size());
                 for (int i = 0; i < correctE.size(); i++) {
                     if(i < computeE.size() && computeE.get(i).equals(correctE.get(i))){
-                        trueNum ++;
+                        trueNumChild ++;
                     }
                 }
+                System.out.println("当前轮次的识别的总路段数为：" + trueNumChild);
+                System.out.println("当前轮次的识别的正确的路段数为：" + totalChild);
+                trueNum += trueNumChild;
+                total += totalChild;
             }
             System.out.println("总识别出的路段数为: " + total);
             System.out.println("正确的路段数为：" + trueNum);

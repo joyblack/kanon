@@ -40,16 +40,5 @@ public class NetworkController {
         return NetworkRepository.netWork.getDfs();
     }
 
-    /**
-     * 修改K值、阈值，返回superK结果
-     */
-    @RequestMapping("superK/{k}/{s}")
-    @ResponseBody
-    public NetWork getDFS(@PathVariable int k, @PathVariable int s){
-        NetworkRepository.netWork.changeK(k, s);
-        return NetworkRepository.netWork;
-    }
-
-
 
 }

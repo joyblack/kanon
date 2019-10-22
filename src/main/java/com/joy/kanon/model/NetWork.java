@@ -1,7 +1,7 @@
 package com.joy.kanon.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.joy.kanon.algo.SuperK;
+import com.joy.kanon.algo.Attack;
 import com.joy.kanon.config.NetworkConfig;
 import com.joy.kanon.enums.KColor;
 import com.joy.kanon.util.ComputeUtil;
@@ -18,60 +18,70 @@ import java.util.stream.Collectors;
 @ToString
 public class NetWork {
     /**
-     * 所有的位置轨迹
+     * 所有的随机用户位置点位置轨迹
      */
-    private List<Vertex> randomVertex;
+    private List<Vertex> randomVertex = new ArrayList<>();
 
     /**
      * DFS访问结果
      */
-    private List<Vertex> dfs;
+    private List<Vertex> dfs = new ArrayList<>();
 
     /**
      * BFS访问结果
      */
-    private List<Vertex> bfs;
+    private List<Vertex> bfs = new ArrayList<>();
 
     /**
      * 边信息
      */
-    private List<Edge> edges;
+    private List<Edge> edges = new ArrayList<>();
 
     /**
      * 路况
      */
     @JsonIgnore
-    public List<Graphic> road;
+    public List<Graphic> road = new ArrayList<>();
 
     /**
      * 用户运行点
      */
-    public List<Vertex> movePoint;
+    public List<Vertex> movePoint = new ArrayList<>();
 
-    private Cell[][] cells = new Cell[NetworkConfig.WIDTH][NetworkConfig.WIDTH];
+    /**
+     * 划分的网格
+     */
+    private Cell[][] cells;
 
     /**
      * 用户的实际运行轨迹
      */
-    private List<Edge> movePath;
+    private List<Edge> movePath = new ArrayList<>();
 
     /**
-     * K匿名算法
+     * 用户 - 区块
      */
-    private SuperK superK;
+    private List<UserWithBlock> userWithBlocks= new ArrayList<>();
 
     /**
-     * 网格
+     * 网络块
      */
-    private List<Block> blocks;
+    private List<Block> blocks = new ArrayList<>();
 
-    public NetWork() {
-        edges = new ArrayList<>();
-        randomVertex = new ArrayList<>();
-        road = new ArrayList<>();
+    /**
+     * 系统配置
+     */
+    private NetworkConfig config;
+
+    /**
+     * 根据配置生成网络拓扑图
+     */
+    public NetWork(NetworkConfig config) {
+        this.config = config;
         /**
          * 网格初始化
          */
+        cells = new Cell[NetworkConfig.WIDTH][NetworkConfig.WIDTH];
         for (int i = 0; i < NetworkConfig.WIDTH; i++) {
             for (int j = 0; j < NetworkConfig.WIDTH; j++) {
                 cells[i][j] = new Cell(
@@ -185,7 +195,7 @@ public class NetWork {
         /**
          * 随机生成数据点
          */
-        for (int i = 0; i < NetworkConfig.RANDOM_NUM; i++) {
+        for (int i = 0; i < config.getRandomNum(); i++) {
             Random random = new Random();
             int x = random.nextInt(NetworkConfig.WIDTH);
             int y = random.nextInt(NetworkConfig.WIDTH);
@@ -197,7 +207,7 @@ public class NetWork {
 
             int number = cells[x][y].getNumber() + 1;
             cells[x][y].setNumber(number);
-            if(number < NetworkConfig.THRESHOLD){
+            if(number < config.getThreshold()){
                 cells[x][y].setColor(KColor.LESS.getColor());
             }else{
                 cells[x][y].setColor(KColor.THAN.getColor());
@@ -222,21 +232,29 @@ public class NetWork {
         movePoint.add(new Vertex("u5", 4, 935, 683));
 
         /**
-         * 通过计算用户点距离最近的边，推测用户路径
+         * 推测用户路径，这作为最准确的路径存在
          */
-        movePath = getPath(movePoint);
+        movePath = Attack.attack(this,movePoint);
 
         /**
-         * K匿名算法
+         * 依次获取每个点所在的网格
          */
-        superK = new SuperK(this);
-        superK.run();
+        userWithBlocks = new ArrayList<>();
+        for (Vertex u : movePoint) {
+            for (Block block : blocks) {
+                if(Block.isInPolygon(u, block)){
+                    userWithBlocks.add(new UserWithBlock(u, block));
+                    break;
+                }
+            }
+        }
+
     }
 
     private String getKColor(int number){
         if(number == 0){
             return KColor.NOTHING.getColor();
-        }else if(number < NetworkConfig.THRESHOLD){
+        }else if(number < config.getThreshold()){
             return KColor.LESS.getColor();
         }else{
             return KColor.THAN.getColor();
@@ -269,16 +287,6 @@ public class NetWork {
         return result;
     }
 
-
-    /**
-     * 修改K值重算
-     */
-    public void changeK(int k, int s){
-        NetworkConfig.K = k;
-        NetworkConfig.THRESHOLD = s;
-        superK = new SuperK(this);
-        superK.run();
-    }
 
 
 }

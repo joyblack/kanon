@@ -14,9 +14,9 @@ import java.util.List;
 @ToString
 public class SuperK {
     /**
-     * 外接圆所需的3个顶点
+     * K值
      */
-    private static final int TOP_NUMBER = 3;
+    private int K;
 
     /**
      * 路网
@@ -24,19 +24,14 @@ public class SuperK {
     @JsonIgnore
     private NetWork netWork;
 
-
-    /**
-     * 用户 - 区块
-     */
-    private List<UserWithBlock> userWithBlocks;
-
     /**
      * 用户 - 匿名区
      */
     private List<UserWithAnon> userWithAnons;
 
-    public SuperK(NetWork netWork) {
+    public SuperK(NetWork netWork, int k) {
         this.netWork = netWork;
+        this.K = k;
     }
 
     public void run(){
@@ -46,25 +41,12 @@ public class SuperK {
         List<Vertex> user = netWork.getMovePoint();
 
         /**
-         * 依次获取每个点所在的网格
-         */
-        userWithBlocks = new ArrayList<>();
-        for (Vertex u : user) {
-            for (Block block : netWork.getBlocks()) {
-                if(Block.isInPolygon(u, block)){
-                    userWithBlocks.add(new UserWithBlock(u, block));
-                    break;
-                }
-            }
-        }
-
-        /**
          * 数据有问题
          */
-        if(userWithBlocks.size() != user.size()){
+        List<UserWithBlock> userWithBlocks = netWork.getUserWithBlocks();
+        if(netWork.getUserWithBlocks().size() != user.size()){
             throw new RuntimeException("网络路况数据有误，请检查...");
         }
-
 
         /**
          * 根据质心点，查找构造区，查找K个最适合的区块点
@@ -86,30 +68,28 @@ public class SuperK {
              */
             Cell[][] cells = netWork.getCells();
             int num = 0;
-            int step = 1;
-            List<RoundFactor> factors = RoundFactor.generateFactor();
-            while (num < NetworkConfig.K && factors.size() > 0) {
-                List<RoundFactor> moved = new ArrayList<>();
-                for (int i = 0; i <= factors.size(); i++) {
-                    RoundFactor roundFactor = factors.get(i);
-                    int x = cellX + roundFactor.getX() * step;
-                    int y = cellY + roundFactor.getY() * step;
-                    if(x < 0 || x == NetworkConfig.WIDTH || y < 0 || y == NetworkConfig.WIDTH){
-                        moved.add(roundFactor);
-                        continue;
+            SpreadMatrix spreadMatrix = new SpreadMatrix(new Point(cellX, cellY));
+            while (num < K) {
+                List<Point> next = spreadMatrix.next();
+                if(next.size() == 0){
+                    break;
+                }else{
+                    for (Point point : next) {
+                        if(addToAnons(cells[point.getX()][point.getY()],anon)){
+                            num ++;
+                            if(num == K){
+                                break;
+                            }
+                        }
                     }
-                    addToAnons(cells[cellX - step][cellY - step],anon);
-
                 }
-                /**
-                 * 删除环绕因子
-                 */
-                if(moved.size() > 0){
-                    System.out.println("删除了" + moved.size() + "个环绕因子...");
-                    factors.removeAll(moved);
-                }
-                step ++;
             }
+            /**
+             * 匿名区圆心、半径
+             * 半径应该为当前传播矩阵的半径 + 2 （+2是为了扩大一圈）
+             */
+            anon.setR(spreadMatrix.getR() + 2);
+            anon.setO(userWithBlock.getBlock().getO());
             userWithAnons.add(anon);
         }
     }
@@ -117,9 +97,7 @@ public class SuperK {
     private boolean addToAnons(Cell cell, UserWithAnon anon){
         if(cell.getColor().equals(KColor.THAN.getColor())){
             anon.getCells().add(cell);
-            if(anon.getCells().size() == NetworkConfig.K){
-                return true;
-            }
+            return true;
         }
         return false;
     }

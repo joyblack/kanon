@@ -12,8 +12,25 @@ import java.util.List;
 @Data
 @ToString
 public class UserWithAnon {
+    /**
+     * 用户实际节点
+     */
     private Vertex user;
+    /**
+     * 选取到的发布网格
+     */
     private List<Cell> cells;
+
+    /**
+     * 匿名区圆心
+     */
+    private Vertex o;
+
+    /**
+     * 匿名区半径
+     */
+    private int r;
+
 
     public UserWithAnon() {
         cells = new ArrayList<>();

@@ -36,7 +36,7 @@
                                 <button @click="loadUser()" :disabled="loadUserBtnDisabled" class="btn btn-primary">加载目标用户位置数据</button>
                                 <hr>
                                 <button @click="showReal()" :disabled="showRealBtnDisabled" class="btn btn-danger">显示用户隐私轨迹</button>
-                                <button @click="superK()" class="btn btn-danger">superK</button>
+                                <button @click="getSuperK()" class="btn btn-danger">superK</button>
                                 <hr>
                                 <button @click="logs = []" class="btn btn-warning">清空日志</button>
                                 <button @click="loadBlock()" class="btn btn-primary">显示区块</button>
@@ -80,7 +80,7 @@
 
                                     <div class="form-group">
                                         <div class="col-sm-offset-2 col-sm-10">
-                                            <button @click="change" class="btn btn-danger">修改</button>
+                                            <button @click="getSuperK()" class="btn btn-danger" type="button">修改</button>
                                         </div>
                                     </div>
                                 </form>
@@ -125,7 +125,8 @@
             loadRoadBtnDisabled: true,
             loadUserBtnDisabled: true,
             showRealBtnDisabled: false,
-            colors: ["red","blue","yellow","black","#20B2AA","green","aqua","purple","#FF00FF", "##00FF00"]
+            colors: ["red","blue","yellow","black","#20B2AA","green","aqua","purple","#FF00FF", "##00FF00"],
+            superK: []
         },
         methods: {
             // 加载所有用户信息数据
@@ -187,10 +188,10 @@
                     this.network.arc(v.x,v.y,5,0,Math.PI * 2);
                     this.network.closePath();
                     this.network.fill();
+                    this.network.closePath();
                     const textLocation = this.getSuitLocation(v.x, v.y);
                     this.network.fillText(v.name + "(" + v.x  + "," + v.y  + ")",textLocation.x,textLocation.y);
                 }
-                this.network.save();
             },
             /**
              *  绘制实际隐私数据
@@ -221,15 +222,35 @@
                 this.loadRoad();
                 this.loadUser();
             } ,
-            superK: function(){
-                const userWithAnons = this.networkData.superK.userWithAnons;
-                this.network.fillStyle = "red";
-                for (let i = 0; i < userWithAnons.length; i++) {
-                    const cells = userWithAnons[i].cells;
-                    for (let j = 0; j < cells.length; j++) {
-                        this.network.fillRect(this.cellSize * cells[j].x,this.cellSize * cells[j].y , this.cellSize, this.cellSize);
-                    }
-                }
+            getSuperK: function(){
+
+                this.$http.get("[[@{/superK/get/}]]" + this.k)
+                    .then(function (response) {
+                        this.restore();
+                        this.logInfo("计算完毕...");
+                        const userWithAnons = response.body.userWithAnons;
+                        this.network.lineWidth = 2;
+                        this.network.strokeStyle = "red"
+                        this.network.fillStyle = "red";
+                        for (let i = 0; i < userWithAnons.length; i++) {
+                            const cells = userWithAnons[i].cells;
+                            /**
+                             * 绘制发布网格
+                             */
+                            for (let j = 0; j < cells.length; j++) {
+                                this.network.fillRect(this.cellSize * cells[j].x,this.cellSize * cells[j].y , this.cellSize, this.cellSize);
+                            }
+                            /**
+                             * 绘制匿名区圆
+                             */
+                            this.network.beginPath();
+                            this.network.arc(userWithAnons[i].o.x,userWithAnons[i].o.y,userWithAnons[i].r * this.cellSize,0,Math.PI * 2);
+                            this.network.stroke();
+                            this.network.closePath();
+                        }
+
+                    })
+
             },
             /**
              * 显示位置信息
@@ -267,17 +288,6 @@
                 const date = new Date();
                 return this.add0(date.getHours()) + ':' + this.add0(date.getMinutes()) + ':' + this.add0(date.getSeconds());
              },
-            /**
-             * 更改配置参数
-             */
-            change: function(){
-                this.$http.get("[[@{/network/change/" + this.k + "/" + this.threshold + "}]]")
-                    .then(function (response) {
-                        this.restore();
-                        this.networkData = response.body;
-                        this.logInfo("更改后计算完毕...")
-                    })
-            },
             /**
              * 格式化日期补0
              */

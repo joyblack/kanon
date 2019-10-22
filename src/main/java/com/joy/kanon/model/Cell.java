@@ -16,7 +16,6 @@ public class Cell {
     private int number;
     // 网格颜色
     private String color;
-
     public Cell(int x, int y, int number, String color) {
         this.x = x;
         this.y = y;

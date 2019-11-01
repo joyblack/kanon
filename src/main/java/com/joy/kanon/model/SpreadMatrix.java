@@ -85,7 +85,7 @@ public class SpreadMatrix {
      */
     private boolean isValid(Point p){
         if(p.getX() >= leftTop.getX() && p.getY() >= leftTop.getY()
-            && p.getX() <= rightBottom.getX() && p.getY() <= rightBottom.getY()
+            && p.getX() < rightBottom.getX() && p.getY() < rightBottom.getY()
         ){
             return true;
         }else{

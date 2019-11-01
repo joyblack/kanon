@@ -32,7 +32,7 @@ public class NetworkConfig {
     }
 
     public static NetworkConfig getDefaultConfig(){
-        return new NetworkConfig(8, 30000);
+        return new NetworkConfig(8, 40000);
     }
 
 }

@@ -26,4 +26,9 @@ public class StatisticResult {
      */
     private double rate;
 
+    /**
+     * K值
+     */
+    private int k;
+
 }

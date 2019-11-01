@@ -9,9 +9,12 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 传统K匿名算法
+ */
 @Data
 @ToString
-public class SuperK {
+public class CommonK {
     /**
      * K值
      */
@@ -28,7 +31,7 @@ public class SuperK {
      */
     private List<UserWithAnon> userWithAnons;
 
-    public SuperK(NetWork netWork, int k) {
+    public CommonK(NetWork netWork, int k) {
         this.netWork = netWork;
         this.K = k;
     }
@@ -48,19 +51,14 @@ public class SuperK {
         }
 
         /**
-         * 根据质心点，查找构造区，查找K个最适合的区块点
+         * 根据用户点进行扩散，查找K个最适合的点（相当于自己就是圆心）
          */
         userWithAnons = new ArrayList<>();
         for (Vertex u : user) {
             UserWithAnon anon = new UserWithAnon();
             anon.setUser(u);
-            // 在该用户所在区块进行查找
-            UserWithBlock userWithBlock = userWithBlocks.stream().filter(b -> b.getUser().getName().equals(u.getName())).findFirst().orElseGet(null);
-            if(userWithBlock == null){
-                throw new RuntimeException("网络路况数据有误，无法定位用户所在区块，请检查...");
-            }
-            int cellX = userWithBlock.getBlock().getO().getX() / 10;
-            int cellY = userWithBlock.getBlock().getO().getY() / 10;
+            int cellX = u.getX() / 10;
+            int cellY = u.getY() / 10;
 
             /**
              * 选择合适的K个
@@ -88,7 +86,6 @@ public class SuperK {
              * 半径应该为当前传播矩阵的半径 + 2 （+2是为了扩大一圈）
              */
             anon.setR(spreadMatrix.getR() + 2);
-            anon.setO(userWithBlock.getBlock().getO());
             userWithAnons.add(anon);
         }
     }

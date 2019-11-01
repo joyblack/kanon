@@ -14,7 +14,7 @@
     <div class="container-fluid" id="app">
         <div class="row">
             <div class="col-md-6" style="margin-top: 24px;">
-                <div id="main" style="width: 800px;height:800px;"></div>
+                <div id="main" style="width: 600px;height:500px;"></div>
             </div>
             <div class="col-md-6">
                  <h2>
@@ -31,17 +31,56 @@
                     <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
                             <button type="button" class="btn btn-default" @click="getSuperK">计算正确率</button>
-                            <button type="button" class="btn btn-default">绘制统计图</button>
+                            <button type="button" class="btn btn-default" @click="speed1">连续计算</button>
+                            <button type="button" class="btn btn-default" @click="draw1">绘制统计图</button>
                         </div>
                     </div>
+                    <hr>
+                    <h2>日志</h2>
+                    <ul>
+                        <li v-for="val in log1">
+                            K值为：{{val.k}}，总识别路段数为：{{val.total}}，正确的路段数为：{{val.correct}}，攻击正确率为: {{ val.rate }}
+                        </li>
+                    </ul>
                 </form>
+
             </div>
         </div>
+
+        <hr>
+
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-6" style="margin-top: 24px;">
+                <div id="main2" style="width: 600px;height:600px;"></div>
+            </div>
+            <div class="col-md-6">
                 <h2>
-                    CommonK
+                    传统K
                 </h2>
+                <hr>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">K</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" v-model="k2">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" class="btn btn-default" @click="getCommonK">计算正确率</button>
+                            <button type="button" class="btn btn-default" @click="speed2">连续计算</button>
+                            <button type="button" class="btn btn-default" @click="draw2">绘制统计图</button>
+                        </div>
+                    </div>
+
+                    <h2>日志</h2>
+                    <hr>
+                    <ul>
+                        <li v-for="val in log2">
+                            K值为：{{val.k}}，总识别路段数为：{{val.total}}，正确的路段数为：{{val.correct}}，攻击正确率为: {{ val.rate }}
+                        </li>
+                    </ul>
+                </form>
             </div>
         </div>
     </div>
@@ -49,38 +88,110 @@
         const app = new Vue({
             data: {
                 k: 3,
-                myChart: []
+                k2: 3,
+                myChart: [],
+                myChart2: [],
+                log1: [],
+                log2: [],
+                speedKArr: []
             },
             methods: {
                 getSuperK: function(){
                     this.$http.get("[[@{/statistic/getSuperK/}]]" + this.k)
                         .then(function (response) {
-                            console.log(response)
+                            this.log1.push(response.body);
                         })
+                },
+                getCommonK: function(){
+                    this.$http.get("[[@{/statistic/getCommonK/}]]" + this.k2)
+                        .then(function (response) {
+                            this.log2.push(response.body);
+                        })
+                },
+                speed1: function(){
+                    this.$http.post("[[@{/statistic/getSuperKS/}]]",{
+                        ks: this.speedKArr
+                    }).then(function (response) {
+                        this.log1 = response.body;
+                        this.draw1();
+                    });
+                },
+                speed2: function(){
+                    this.$http.post(
+                        "[[@{/statistic/getCommonKS/}]]",
+                        {
+                            ks: this.speedKArr
+                        }).then(function (response) {
+                        this.log2 = response.body;
+                        this.draw2();
+                    });
+                },
+                draw1: function(){
+                    let x = [], y = [];
+                    x.push(0);
+                    y.push(1);
+                    for (let i = 0; i < this.log1.length; i++) {
+                        x.push(this.log1[i].k);
+                        y.push(this.log1[i].rate)
+                    }
+                    this.myChart.setOption(this.getOption(x, y));
+                },
+                draw2: function(){
+                    let x = [], y = [];
+                    x.push(0);
+                    y.push(1);
+                    for (let i = 0; i < this.log2.length; i++) {
+                       x.push(this.log2[i].k);
+                       y.push(this.log2[i].rate)
+                    }
+                    this.myChart2.setOption(this.getOption(x, y));
+                },
+                getOption: function(x, y){
+                    return {
+                        title: {
+                            text: '攻击正确率/K值'
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: x
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [{
+                            data: y,
+                            type: 'line',
+                            smooth: true
+                        }]
+                    };
                 }
-
             },
             mounted: function(){
                 const option = {
                     title: {
-                        text: 'ECharts 入门示例'
-                    },
-                    tooltip: {},
-                    legend: {
-                        data:['销量']
+                        text: '攻击正确率/K值'
                     },
                     xAxis: {
-                        data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+                        type: 'category',
+                        data: [0,1,2,3,4,5]
                     },
-                    yAxis: {},
+                    yAxis: {
+                        type: 'value'
+                    },
                     series: [{
-                        name: '销量',
-                        type: 'bar',
-                        data: [5, 20, 36, 10, 10, 20]
+                        data: [1, 0.9, 0.8, 0.6, 0.4, 0.1, 0.05],
+                        type: 'line',
+                        smooth: true
                     }]
                 };
+
                 this.myChart = echarts.init(document.getElementById('main'));
                 this.myChart.setOption(option);
+
+                this.myChart2 = echarts.init(document.getElementById('main2'));
+                this.myChart2.setOption(option);
+
+                this.speedKArr = [1, 2, 3, 4, 5, 6,7,8,9,10,20,30,40]
             }
         }).$mount("#app");
     </script>

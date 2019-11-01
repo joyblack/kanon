@@ -4,6 +4,9 @@ import com.joy.kanon.util.ComputeUtil;
 import lombok.Data;
 import lombok.ToString;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @ToString
 @Data
 public class Edge {
@@ -22,5 +25,12 @@ public class Edge {
         this.v1 = v1;
         this.v2 = v2;
         length = ComputeUtil.getInstance(v1,v2);
+    }
+
+    /**
+     * 显示简单的边name信息
+     */
+    public static String show(List<Edge> edgeList){
+        return edgeList.stream().map(Edge::getName).collect(Collectors.joining("->"));
     }
 }

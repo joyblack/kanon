@@ -193,7 +193,7 @@ public class NetWork {
 
         blocks.add(new Block(Arrays.asList(P5, N11.getVertex(),N13.getVertex(),N17.getVertex()),new Vertex("P10",0,700,400)));
 
-        /**
+        /*
          * 随机生成数据点
          */
         for (int i = 0; i < config.getRandomNum(); i++) {

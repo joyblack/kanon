@@ -151,12 +151,13 @@
                 this.loadUserBtnDisabled = false;
                 this.logInfo("开始加载实际路况...")
                 this.network.lineWidth = this.cellSize;
-                const edges = this.networkData.edges
-                this.network.strokeStyle = "#555"
+                const edges = this.networkData.edges;
+                this.network.strokeStyle = "#555";
                 for (let i = 0; i < edges.length; i++) {
                     const edge = edges[i];
                     this.network.moveTo(edge.v1.x, edge.v1.y);
                     this.network.lineTo(edge.v2.x, edge.v2.y);
+                    this.network.lineTo(edge.v2.x + 30, edge.v2.y + 30);
                     this.network.stroke();
                 }
 
